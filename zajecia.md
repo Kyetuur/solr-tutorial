@@ -218,7 +218,8 @@ Raw Query Parameters
 facet.mincount=10
 ```
 
-Warte zaznaczenia jest to że Solr domyślnie zwraca maksymalnie 100 różnych kategorii, jeśli chcemy więcej musimy określić facet.limit.  
+Warte zaznaczenia jest to że Solr domyślnie zwraca maksymalnie 100 różnych kategorii, jeśli chcemy więcej/mniej musimy określić facet.limit.  
+Facet'y pojawiaja się w kolejności od najbardziej liczebnego, chyba że ustawimy inaczej.    
 
 
 Zauważmy że facet działa po *termach* konkretnych termach, dlatego zapytanie:  
@@ -381,4 +382,58 @@ których tytuł zawiera słowo *the* oraz *and* rozdzielone maksymalnie 2 słowa
   <br>
   title:"the and"~2
   <br>
+</details>
+
+## Zadanie 6
+
+Napisz zapytanie, które zwróci te książki,
+których imię autora zaczyna się od "Ch"
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  q: 
+  <br>
+  author_str:Ch*
+  <br>
+</details>
+  
+Użycie author sprawi, że zostaną wyświetleni Ci twórcy których imie albo nazwisko zaczyna się od "Ch"
+
+## Zadanie 7
+
+W którym roku powstało najwięcej książek ?
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  q: 
+  <br>
+  *:*
+  <br>
+  <br>
+  facet.field=year
+  <br>
+  facet.mincount=1
+  <br>
+  facet.limit=1
+
+</details>
+
+
+
+## Zadanie 8
+
+W jakim roku powstało najwięcej książek? 
+W jakim języku powstało najwięcej książek w tym roku? Ile ?
+
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  q: 
+  <br>
+  *:*
+  <br>
+  facet.pivot=year,language
+  <br>
+
+
 </details>
