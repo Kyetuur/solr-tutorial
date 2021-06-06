@@ -121,11 +121,26 @@ q
 title:Fall
 ```
 Takie zapytanie wyszuka nam te dokumenty, w których znajduje się słowo *Fall* w polu *title*  
-Możemy użyć również wildcardów *?* dla pojedynczego znaku oraz *\**
+Możemy użyć również wildcardów *?* dla pojedynczego znaku oraz *\**  
+
+q  
+```
+title:Fa?l
+```
+
+  
+q  
+```
+title:Fa*
+```
+
+Szybkie zadanie:
+
+>Wyszukaj książki powstałe w jakimś imperium (nazwa kraju zawierająca 'Empire') 
 
 ---
 
-### Wyszukiwanie AND
+### Wyszukiwanie złożone
 
 q
 ```
@@ -134,6 +149,15 @@ title:(Apart AND Things)
 Ważne! AND musi być z wielkich liter.
 
 ---
+
+W przypadku braku operatora przy słowie mamy doczynienia z alternatywą.  
+Możemy użyć operatora + aby wskazać że dane słowo jest obowiązkowe.  
+
+Szybkie zadanie:
+
+>Wyszukaj książki których tutuł posiada słowo *King* oraz *Fury*
+
+
 
 ### Wyszukiwanie Proximity
 
@@ -144,6 +168,10 @@ title: "Things Apart"~1
 
 Takie wyszukiwanie znajduje dokumenty gdzie *Things* and *Apart* występują w podanej kolejności, a między nimi jest maksymalnie 1 słowo.  
 W takim wyszukaniu ważne są cudzysłowy - przy tym również tracimy możliwość używania wildcard.
+
+Szybkie zadanie:
+
+>Wyszukaj książki w których występują słowa *The* oraz *The* rozdzielone maksymalnie 3 słowami
 
 ---
 
@@ -156,6 +184,10 @@ year: [1600 TO 1608}
 
 Takie zapytanie zwróci książki napisane między 1600 a 1608 roku. (Nawias kwadratowy oznacza zawieranie wartości granicznej, klamrowy przeciwnie)
 
+Szybkie zadanie:
+
+>Wyszukaj książki mające między 160 a 200 stron
+
 ---
 
 ### Wyszukiwanie Fuzzy
@@ -167,6 +199,11 @@ title:Asarr~2
 
 Wyszukiwanie pozwalające znaleźć słowa podobne (w sensie odległości Damerau-Levenshteina).
 
+Szybkie zadanie:
+
+>Znajdz książke zawierąjące słowo odlęgle od *Pride* o maksymalnie 3 jednostki
+
+
 ### Wyszukiwanie Negative
 
 q
@@ -175,6 +212,10 @@ q
 ```
 
 Wyszukiwanie pozwalające znaleźć dokumenty nienawierające jakiegoś słowa.
+
+Szybkie zadanie:
+
+>Znajdz książki napisane w językach innych niż francuski w *Ireland*
 
 ### Pozostałe pola
 
@@ -189,15 +230,15 @@ Wyszukiwanie pozwalające znaleźć dokumenty nienawierające jakiegoś słowa.
 *edismax* - włącza obsługe Extended DisMax Parsera.  
 *hl* - highlighting, włącza podkręślanie wyszukany fraz.  
 
-## Facet
+## Faseta
 
-Facet - kategoryzowanie wyników.
+Faseta - kategoryzowanie wyników.
 Tutaj przydatny jest zewnętrzny program do wywołań REST, np. Postman.  
 UI Solr'a jest tutaj mocno ograniczone  
 
-Dla ułatwienia prezentacji facet'ów, ustawmy parametr *rows* na 0.
+Dla ułatwienia prezentacji faset, ustawmy parametr *rows* na 0.
 
-### Facet po polu
+### Faseta po polu
 
 Włączamy ustawienie *facet* a następnie ustawiamy  
 facet.field
@@ -222,16 +263,16 @@ Warte zaznaczenia jest to że Solr domyślnie zwraca maksymalnie 100 różnych k
 Facet'y pojawiaja się w kolejności od najbardziej liczebnego, chyba że ustawimy inaczej.    
 
 
-Zauważmy że facet działa po *termach* konkretnych termach, dlatego zapytanie:  
+Zauważmy że faseta działa po *termach* konkretnych termach, dlatego zapytanie:  
 
 facet.field
 ```
 author
 ```
 
-Zwróci facet'y rozbite na konkretne termy danego tekstu. (Pole author jest typu text)
+Zwróci fasety rozbite na konkretne termy danego tekstu. (Pole author jest typu text)
 
-Jeśli interesują nas facet'y po konkretnych autorach możemy użyć zdefiniowanego wcześniej pola author_str,  
+Jeśli interesują nas fasety po konkretnych autorach możemy użyć zdefiniowanego wcześniej pola author_str,  
 którego wartość jest tożsama z wartością author, ale typ tego pola jest stringiem (który nie podlega tokenizacji)
 
 facet.field
@@ -239,7 +280,12 @@ facet.field
 author_str
 ```
 
-### Facet Zakresowy
+Szybkie zadanie:
+
+> Wypisz ile jest książek w konkretnych językach
+
+
+### Faseta Zakresowa
 
 Umożliwia kategoryzowanie w podanym zakresie, w celu jego użycia należy zdefiniować  następujące parametry
 
@@ -270,8 +316,11 @@ W formie pojedynczego QueryStringa:
 facet.range=year&facet.range.start=0&facet.range.end=2000&facet.range.gap=500
 ```
 
+Szybkie zadanie:
+> Wypisz ile książek powstało w konkretnych dziesięcioleciach XX wieku
 
-### Facet dzielony
+
+### Faseta dzielona
 Służy do tworzenia wielo-dzielonych kategorii,
 
 przykładowo jeśli chcemy się dowiedzieć ile książek w danych latach zostało napisanych przez konkretne osoby.
@@ -281,7 +330,11 @@ Zapytanie:
 facet.pivot=author_str,year
 ```
 
-### Facet Interwałowy
+Szybkie zadanie:
+> Podziel książki według roku napisania, a następnie po językach.
+
+
+### Faseta Interwałowa
 Służy do okreslenia ile znajduje się dokumentów w podanym przedziale.
 Przykładowo:
 
@@ -295,8 +348,7 @@ facet.interval=year&facet.interval.set=[0,1000]
 Zwróci ilość książek napisanych w latach 0,1000 (Obustronnie zawierające, można ograniczyć zawieranie korzystając ze zwykłego nawiasu zamiast kwadratowego)
 
 
-
-# Zadanka
+# Zadania 'domowe'
 
 
 ## Zadanie 1
@@ -396,8 +448,22 @@ których imię autora zaczyna się od "Ch"
   author_str:Ch*
   <br>
 </details>
-  
+
 Użycie author sprawi, że zostaną wyświetleni Ci twórcy których imie albo nazwisko zaczyna się od "Ch"
+
+
+## Zadanie 7
+
+Napisz zapytanie, które zwróci książki:
+Napisane w języku angielskim, w latach 1900-2000, niezawierające słowa *and*
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  q: 
+  <br>
+  (-title:and AND year:[1900 TO 2000] AND language:english)
+  <br>
+</details>
 
 ## Zadanie 7
 
@@ -419,11 +485,10 @@ W którym roku powstało najwięcej książek ?
 </details>
 
 
-
 ## Zadanie 8
 
 W jakim roku powstało najwięcej książek? 
-W jakim języku powstało najwięcej książek w tym roku? Ile ?
+W jakim języku powstało najwięcej książek w tym roku? Ile?
 
 
 <details>
@@ -434,6 +499,4 @@ W jakim języku powstało najwięcej książek w tym roku? Ile ?
   <br>
   facet.pivot=year,language
   <br>
-
-
 </details>
