@@ -500,3 +500,8 @@ W jakim języku powstało najwięcej książek w tym roku? Ile?
   facet.pivot=year,language
   <br>
 </details>
+
+
+Dla chętnych jeszcze dodatkowe zadanka na stronie Solr'a.  
+Większość wymaga jakiegoś klienta REST.
+https://solr.apache.org/guide/8_8/solr-tutorial.html
