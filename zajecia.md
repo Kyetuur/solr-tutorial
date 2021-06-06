@@ -7,7 +7,7 @@ Instalacja solra w kontenerze dockera:
 (Działającego na porcie 8983 w trybie Cloud)
 
 ```
-docker run -d --name solr_nosql -p 8983:8983 -t solr -cloud
+docker run -d --name solr_nosql -p 8983:8983 solr -cloud
 ```
 
 Przechodzimy pod adres
