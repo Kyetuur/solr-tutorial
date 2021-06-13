@@ -348,7 +348,7 @@ facet.interval=year&facet.interval.set=[0,1000]
 Zwróci ilość książek napisanych w latach 0,1000 (Obustronnie zawierające, można ograniczyć zawieranie korzystając ze zwykłego nawiasu zamiast kwadratowego)
 
 
-# Zadania 'domowe'
+## Zadania 'domowe'
 
 
 ## Zadanie 1
@@ -502,6 +502,222 @@ W jakim języku powstało najwięcej książek w tym roku? Ile?
 </details>
 
 
-Dla chętnych jeszcze dodatkowe zadanka na stronie Solr'a.  
-Większość wymaga jakiegoś klienta REST.
-https://solr.apache.org/guide/8_8/solr-tutorial.html
+
+
+# Schema API
+Ta cześć wymaga klienta REST
+
+## Pobieranie informacji o schemacie
+
+Aby pobrać wszystkie informacje o aktualnym schemacie należy wywołać REST API:
+```
+http://localhost:8983/solr/collection/schema
+```
+
+
+Aby pobrać informacje o polach:
+
+```
+http://localhost:8983/solr/collection/schema/fields
+```
+
+Do modyfikowania schematu służy jeden endpoint:
+
+```
+http://localhost:8983/solr/collection/schema
+```
+
+Odpowiednie zapytanie POST pozwala:
+- Dodać nowe pole
+- Usunąć pole
+- Zamienić pole
+- Dodać dynamiczne pole
+- Usunac dynamiczne pole
+- Zamienić dynamiczne pole
+- Dodać nowy typ pola
+- Usunac typ pola
+- Zamienić typ pola
+- Dodać pole kopiowane
+- Usunąć pole kopiowane
+
+
+## Dodanie nowego pola za pomocą zapytania REST
+
+Zapytanie o treści:
+```
+  {
+    "add-field":{
+      "name":"nazwa pola",
+       "type" : "typ pola",
+      ... dodatkowe parametry, na przykład "indexed", "stored"
+     }
+  }
+```
+
+Można zauważyć ze w części z zapytaniami korzystaliśmy z takich zapytań do utworzenia schematu.
+
+
+## Dodanie nowego typu za pomocą zapytania REST i utworzenie pola o tym typie
+
+```
+
+{
+  "add-field-type" : {
+     "name":"mailType",
+     "class":"solr.TextField",
+     "positionIncrementGap":"100",
+     "analyzer" : {
+        "tokenizer":{
+           "class":"solr.UAX29URLEmailTokenizerFactory"
+            },
+      }
+    }
+}
+
+Gdy chcemy dodać filter albo pare filtrów, do obiektu "analyzer" dodajemy tablice o nazwie "filters"
+```
+
+Sprawdzmy czy typ został dodany:
+
+```
+http://localhost:8983/solr/collection/schema/fieldtypes
+```
+
+Utwórzmy pole tego typu:
+
+```
+{
+  "add-field":{
+    "name":"mailField",
+     "type" : "mailType"
+  }
+}
+```
+
+Przejdzmy do solr i dodajmy jakiś dokument z nowym polem:
+
+```
+{
+"title":"specjalne",
+"mailField":"jakis.mail@jakas.domena.toplevel"
+}
+```
+
+Wyszukajmy je 
+
+```
+q:
+mailField:*
+
+```
+
+Tak powstałe pole podlega tokenizacji tylko według całego maila, a nie poszczególnych jego części (np. jakis)
+
+
+## Zadania domowe Schema:
+
+Rozwiązania zawierają Body zapytania, które trzeba wysłać pod adres *http://localhost:8983/solr/collection/schema* .   
+Rozwiązania mogą mieć trochę rozjechane formatowanie JSONów.
+
+## Zadanie 1
+
+Za pomocą Schema API stwórz nowy typ pola o nazwie "asciiNGram", który używa
+Edge N-Gram Tokenizera (solr.EdgeNGramTokenizerFactory) oraz ASCII Folding Filter (solr.ASCIIFoldingFilterFactory),
+typ powinien być pochodną TextField
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  <code>
+  {<br>
+  "add-field-type" : {<br>
+     "name":"asciiNGram",<br>
+     "class":"solr.TextField",<br>
+     "analyzer" : {<br>
+        "tokenizer":{<br>
+           "class":"solr.UAX29URLEmailTokenizerFactory"<br>
+            },<br>
+            "filters":[{<br>
+              "class": "solr.ASCIIFoldingFilterFactory"<br>
+            }]<br>
+      }
+  }
+}
+</code>
+</details>
+
+
+
+## Zadanie 2
+
+Dla utworzonego w zadaniu 1 typu stwórz pole o nazwie asciiField.
+Pole to nie powinno być indeksowane ( ustawienie właściwości *indexed* na false),
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  <code>
+{
+  "add-field":{ <br>
+    "name":"asciiField",<br>
+     "type" : "asciiNGram",<br>
+     "indexed": false <br>
+  }
+}
+</code>
+</details>
+
+## Zadanie 3 
+
+Utwórz pole kopiowane z pola "author_str" na pole "asciiField".
+Utworzenie takiego pola wymaga użycia obiektu "add-copy-field" z właściwościami : *source* oraz *dest*
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  <code>
+{
+  "add-copy-field":{ <br>
+    "source" : "author_str", <br>
+    "dest" : "asciiField" <br>
+  }
+}
+</code>
+</details>
+
+## Zadanie 4
+Usuń pole asciiField.
+Aby to zrobić w pierwszej kolejności trzeba usunąć copy-field ("delete-copy-field" z analogicznymi wlasciwosciami jak te do jego utworzenia).
+Do samego usunięcia pola użyj "delete-field" z właściwością "name".
+
+<details>
+  <summary>Rozwiązanie:</summary>
+  <code>
+{
+  "delete-copy-field":{ 
+    "source" : "author_str",
+    "dest" : "asciiField"
+  }
+}
+
+
+{
+  "delete-field":{ <br>
+    "name" : "asciiField" <br>
+  }
+}
+</code>
+</details>
+
+## Zadanie 5
+Usuń typ asciiNGram
+
+Użyj "delete-field-type" z właściwością name.
+<details>
+  <summary>Rozwiązanie:</summary>
+  <code>
+
+{
+  "delete-field-type":{ <br>
+    "name" : "asciiNGram" <br>
+  }
+}
+</code>
+</details>
